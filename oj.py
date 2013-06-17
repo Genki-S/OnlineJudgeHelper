@@ -314,6 +314,12 @@ class OnlineJudge:
             print "Test case template file " + str(index) + " is created."
             return
 
+    def get_setting_file_name(self):
+        return os.path.expanduser(self.options.setting)
+
+    def get_setting(self, key):
+        return json.load(open(self.get_setting_file_name()))[key]
+
     def submit(self):
         raise NotImplementedError
 
@@ -364,7 +370,7 @@ class POJ(OnlineJudge):
     def submit(self):
         opener = self.get_opener()
 
-        setting = json.load(open('setting.json'))['poj']
+        setting = self.get_setting('poj')
         postdata = dict()
         postdata['user_id1'] = setting['user_id']
         postdata['password1'] = setting['password']
@@ -429,7 +435,7 @@ class MJudge(OnlineJudge):
     def download_html(self):
         opener = self.get_opener()
 
-        setting = json.load(open('setting.json'))['m_judge']
+        setting = self.get_setting('m_judge')
         postdata = dict()
         postdata['user'] = setting['user_id']
         postdata['pswd'] = setting['password']
@@ -457,7 +463,7 @@ class MJudge(OnlineJudge):
     def submit(self):
         opener = self.get_opener()
 
-        setting = json.load(open('setting.json'))['m_judge']
+        setting = self.get_setting('m_judge')
         postdata = dict()
         postdata['user'] = setting['user_id']
         postdata['pswd'] = setting['password']
@@ -501,8 +507,7 @@ class AOJ(OnlineJudge):
     def submit(self):
         opener = self.get_opener()
 
-        setting = json.load(open('setting.json'))['aoj']
-
+        setting = self.get_setting('aoj')
         postdata = dict()
         postdata['userID'] = setting['user_id']
         postdata['password'] = setting['password']
@@ -598,7 +603,7 @@ class AtCoder(OnlineJudge):
         if self.opener == None:
             opener = OnlineJudge.get_opener(self)
 
-            setting = json.load(open('setting.json'))['atcoder']
+            setting = self.get_setting('atcoder')
             postdata = dict()
             postdata['name'] = setting['user_id']
             postdata['password'] = setting['password']
@@ -644,7 +649,7 @@ class AtCoder(OnlineJudge):
         print 'Submit ... ' + str(p.getcode())
 
         time.sleep(2.0)
-        setting = json.load(open('setting.json'))['atcoder']
+        setting = self.get_setting('atcoder')
         subprocess.call([setting['browser'], 'http://arc%03d.contest.atcoder.jp/submissions/me' % self.contest_id])
 
     def get_language_id_from_extension(self):
@@ -670,7 +675,7 @@ class ZOJContest(OnlineJudge):
         if self.opener == None:
             opener = OnlineJudge.get_opener(self)
 
-            setting = json.load(open('setting.json'))['zoj']
+            setting = self.get_setting('zoj')
             postdata = dict()
             postdata['handle'] = setting['user_id']
             postdata['password'] = setting['password']
@@ -769,6 +774,9 @@ def main():
     parser.add_option('-d', '--download', action="store_true",
                       dest='download', default=False,
                       help="Only download the test cases")
+    parser.add_option('--setting', action="store",
+                      dest="setting", default="setting.json",
+                      help="Specify the setting file name")
 
     (options, args) = parser.parse_args()
 
